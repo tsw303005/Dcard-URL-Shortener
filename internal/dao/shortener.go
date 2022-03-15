@@ -16,8 +16,8 @@ type URL struct {
 }
 
 type URLDAO interface {
-	ShortenURL(ctx context.Context, url string, expiredAt time.Time) (URL, error)
-	GetURLByID(ctx context.Context, ID uuid.UUID) (URL, error)
+	Shorten(ctx context.Context, url string, expiredAt time.Time) (string, error)
+	Get(ctx context.Context, ID uuid.UUID) (URL, error)
 }
 
 var (
