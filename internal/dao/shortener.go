@@ -10,14 +10,14 @@ import (
 
 type URL struct {
 	ID         uuid.UUID
-	ExpiredAt  time.Time
 	URL        string
 	ShortenURL string
+	ExpiredAt  time.Time
 }
 
 type URLDAO interface {
-	Shorten(ctx context.Context, url string, expiredAt time.Time) (string, error)
-	Get(ctx context.Context, ID uuid.UUID) (URL, error)
+	Shorten(ctx context.Context, url string, expiredAt time.Time) (string, string, error)
+	Get(ctx context.Context, ID uuid.UUID) (string, error)
 }
 
 var (

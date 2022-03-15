@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -9,7 +8,7 @@ import (
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/dao"
 )
 
-type service struct {
+type Service struct {
 	URLDAO dao.URLDAO
 }
 
@@ -19,13 +18,18 @@ type shortenResponse struct {
 	shortUrl string
 }
 
-func NewService(URLDAO dao.URLDAO) *service {
-	return &service{
+type getResponse struct {
+	code        int
+	originalUrl string
+}
+
+func NewService(URLDAO dao.URLDAO) *Service {
+	return &Service{
 		URLDAO: URLDAO,
 	}
 }
 
-func (s *service) ShortenURL(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	var req dao.URL
 
 	// parse request
@@ -36,7 +40,7 @@ func (s *service) ShortenURL(ctx context.Context, w http.ResponseWriter, r *http
 	}
 
 	// shorten url
-	url, err := s.URLDAO.Shorten(ctx, req.URL, req.ExpiredAt)
+	id, url, err := s.URLDAO.Shorten(req.URL, req.ExpiredAt)
 
 	if err != nil {
 		log.Fatal(err)
@@ -44,8 +48,32 @@ func (s *service) ShortenURL(ctx context.Context, w http.ResponseWriter, r *http
 
 	res := shortenResponse{
 		code:     200,
-		id:       url,
-		shortUrl: "http://localhost/" + url,
+		id:       id,
+		shortUrl: url,
+	}
+
+	json.NewEncoder(w).Encode(res)
+}
+
+func (s *Service) GetURL(w http.ResponseWriter, r *http.Request) {
+	var req dao.URL
+
+	// parse request
+	err := json.NewDecoder(r.Body).Decode(&req)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	url, err := s.URLDAO.Get(req.ID)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	res := getResponse{
+		code:        200,
+		originalUrl: url,
 	}
 
 	json.NewEncoder(w).Encode(res)
