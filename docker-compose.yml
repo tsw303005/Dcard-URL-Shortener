@@ -1,0 +1,18 @@
+version: '3.9'
+
+x-common-env: &common-env
+  POSTGRES_URL: postgres://postgres@localhost:5432/postgres?sslmode=disable
+  REDIS_ADDR: localhost:6379
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - 5432:5432
+
+  redis:
+    image: redis:6.2-alpine
+    ports:
+      - 6379:6379
