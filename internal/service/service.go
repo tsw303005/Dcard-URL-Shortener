@@ -52,6 +52,11 @@ func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	js, err := json.Marshal(res)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 }
@@ -69,6 +74,11 @@ func (s *Service) GetURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	js, err := json.Marshal(url)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 }
