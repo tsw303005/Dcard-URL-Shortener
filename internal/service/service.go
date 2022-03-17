@@ -2,25 +2,16 @@ package service
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/dao"
+	"github.com/tsw303005/Dcard-URL-Shortener/internal/message"
 )
 
 type Service struct {
 	URLDAO dao.URLDAO
-}
-
-type shortenResponse struct {
-	code     int
-	id       string
-	shortUrl string
-}
-
-type getResponse struct {
-	code        int
-	originalUrl string
 }
 
 func NewService(URLDAO dao.URLDAO) *Service {
@@ -30,51 +21,60 @@ func NewService(URLDAO dao.URLDAO) *Service {
 }
 
 func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
-	var req dao.URL
+	var req *message.ShortenUrlRequest
 
 	// parse request
-	err := json.NewDecoder(r.Body).Decode(&req)
+	body, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = json.Unmarshal(body, req)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	println(req)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// shorten url
-	id, url, err := s.URLDAO.Shorten(r.Context(), req.URL, req.ExpiredAt)
+	url_id, shorten_url, err := s.URLDAO.Shorten(r.Context(), dao.URL{
+		Url:       req.Url,
+		ExpiredAt: req.ExpiredAt,
+	})
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	res := shortenResponse{
-		code:     200,
-		id:       id,
-		shortUrl: url,
+	res := message.ShortenUrlResponse{
+		Id:         url_id,
+		ShortenUrl: shorten_url,
 	}
 
-	json.NewEncoder(w).Encode(res)
+	js, err := json.Marshal(res)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
 
 func (s *Service) GetURL(w http.ResponseWriter, r *http.Request) {
-	var req dao.URL
+	query := r.URL.Query()
+	id := query.Get("ID")
 
-	// parse request
-	err := json.NewDecoder(r.Body).Decode(&req)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	url, err := s.URLDAO.Get(r.Context(), req.ID)
+	url, err := s.URLDAO.Get(r.Context(), dao.URL{
+		ID: id,
+	})
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	res := getResponse{
-		code:        200,
-		originalUrl: url,
-	}
-
-	json.NewEncoder(w).Encode(res)
+	js, err := json.Marshal(url)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
