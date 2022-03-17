@@ -13,9 +13,9 @@ func main() {
 }
 
 func runAPI() {
-	var URLDAO dao.URLDAO
 
-	svc := service.NewService(URLDAO)
+	testDAO := dao.NewTestDAO()
+	svc := service.NewService(testDAO)
 
 	http.HandleFunc("/get", svc.GetURL)
 	http.HandleFunc("/shorten", svc.ShortenURL)
