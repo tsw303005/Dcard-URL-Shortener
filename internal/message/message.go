@@ -5,11 +5,11 @@ import (
 )
 
 type ShortenUrlRequest struct {
-	Url       string
-	ExpiredAt time.Time
+	Url       string    `json:"url"`
+	ExpiredAt time.Time `json:"expiredAt"`
 }
 
 type ShortenUrlResponse struct {
-	Id         string
-	ShortenUrl string
+	Id         string `json:"id"`
+	ShortenUrl string `json:"shortUrl"`
 }

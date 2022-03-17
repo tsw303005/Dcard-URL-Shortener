@@ -21,7 +21,7 @@ func NewService(URLDAO dao.URLDAO) *Service {
 }
 
 func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
-	var req *message.ShortenUrlRequest
+	var req message.ShortenUrlRequest
 
 	// parse request
 	body, err := ioutil.ReadAll(r.Body)
@@ -30,13 +30,7 @@ func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	err = json.Unmarshal(body, req)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	println(req)
+	err = json.Unmarshal(body, &req)
 
 	if err != nil {
 		log.Fatal(err)
