@@ -40,7 +40,7 @@ func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// shorten url
-	id, url, err := s.URLDAO.Shorten(req.URL, req.ExpiredAt)
+	id, url, err := s.URLDAO.Shorten(r.Context(), req.URL, req.ExpiredAt)
 
 	if err != nil {
 		log.Fatal(err)
@@ -65,7 +65,7 @@ func (s *Service) GetURL(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	url, err := s.URLDAO.Get(req.ID)
+	url, err := s.URLDAO.Get(r.Context(), req.ID)
 
 	if err != nil {
 		log.Fatal(err)
