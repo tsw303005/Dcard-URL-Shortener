@@ -13,7 +13,6 @@ func main() {
 }
 
 func runAPI() {
-
 	testDAO := dao.NewTestDAO()
 	svc := service.NewService(testDAO)
 

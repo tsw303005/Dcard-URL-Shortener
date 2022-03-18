@@ -22,7 +22,7 @@ func NewService(URLDAO dao.URLDAO) *Service {
 func (s *Service) GetUrl(c *gin.Context) {
 	id := c.Query("id")
 
-	url, err := s.URLDAO.Get(dao.URL{
+	url, err := s.URLDAO.Get(c.Request.Context(), dao.URL{
 		ID: id,
 	})
 
@@ -47,7 +47,7 @@ func (s *Service) ShortenUrl(c *gin.Context) {
 		})
 	}
 
-	url_id, shorten_url, err := s.URLDAO.Shorten(dao.URL{
+	url_id, shorten_url, err := s.URLDAO.Shorten(c.Request.Context(), dao.URL{
 		Url:       req.Url,
 		ExpiredAt: req.ExpiredAt,
 	})

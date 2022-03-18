@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"context"
 	"errors"
 	"time"
 )
@@ -13,8 +14,8 @@ type URL struct {
 }
 
 type URLDAO interface {
-	Shorten(req URL) (string, string, error)
-	Get(req URL) (string, error)
+	Shorten(ctx context.Context, req URL) (string, string, error)
+	Get(ctx context.Context, req URL) (string, error)
 }
 
 var (
@@ -33,14 +34,14 @@ func NewTestDAO() *Test {
 	}
 }
 
-func (t *Test) Shorten(req URL) (string, string, error) {
+func (t *Test) Shorten(ctx context.Context, req URL) (string, string, error) {
 	x := "a"
 	y := "b"
 
 	return x, y, nil
 }
 
-func (t *Test) Get(req URL) (string, error) {
+func (t *Test) Get(ctx context.Context, req URL) (string, error) {
 	x := req.ID
 
 	return x, nil
