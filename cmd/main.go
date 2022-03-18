@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/dao"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/service"
 )
@@ -17,8 +17,24 @@ func runAPI() {
 	testDAO := dao.NewTestDAO()
 	svc := service.NewService(testDAO)
 
-	http.HandleFunc("/get", svc.GetURL)
-	http.HandleFunc("/shorten", svc.ShortenURL)
+	r := gin.Default()
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "success",
+		})
+	})
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	r.GET("/get", func(c *gin.Context) {
+		svc.GetUrl(c)
+	})
+
+	r.POST("/shorten", func(c *gin.Context) {
+		svc.ShortenUrl(c)
+	})
+
+	err := r.Run(":8080")
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }

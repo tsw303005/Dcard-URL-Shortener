@@ -1,11 +1,10 @@
 package service
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/dao"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/message"
 )
@@ -20,24 +19,35 @@ func NewService(URLDAO dao.URLDAO) *Service {
 	}
 }
 
-func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
+func (s *Service) GetUrl(c *gin.Context) {
+	id := c.Query("id")
+
+	url, err := s.URLDAO.Get(dao.URL{
+		ID: id,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   err,
+			"request": "get url",
+		})
+		log.Fatal(err)
+	}
+
+	c.Redirect(302, url)
+}
+
+func (s *Service) ShortenUrl(c *gin.Context) {
 	var req message.ShortenUrlRequest
 
-	// parse request
-	body, err := ioutil.ReadAll(r.Body)
-
-	if err != nil {
-		log.Fatal(err)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   err,
+			"request": "shorten url",
+		})
 	}
 
-	err = json.Unmarshal(body, &req)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// shorten url
-	url_id, shorten_url, err := s.URLDAO.Shorten(r.Context(), dao.URL{
+	url_id, shorten_url, err := s.URLDAO.Shorten(dao.URL{
 		Url:       req.Url,
 		ExpiredAt: req.ExpiredAt,
 	})
@@ -46,39 +56,10 @@ func (s *Service) ShortenURL(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	res := message.ShortenUrlResponse{
+	resp := message.ShortenUrlResponse{
 		Id:         url_id,
 		ShortenUrl: shorten_url,
 	}
 
-	js, err := json.Marshal(res)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
-}
-
-func (s *Service) GetURL(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-	id := query.Get("ID")
-
-	url, err := s.URLDAO.Get(r.Context(), dao.URL{
-		ID: id,
-	})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	js, err := json.Marshal(url)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+	c.JSON(200, resp)
 }
