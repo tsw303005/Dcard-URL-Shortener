@@ -22,7 +22,7 @@ func NewService(URLDAO dao.ShortenerDAO) *Service {
 func (s *Service) GetUrl(c *gin.Context) {
 	shorten_url := c.Query("shorten_url")
 
-	url, err := s.URLDAO.Get(c.Request.Context(), &dao.Shortener{
+	shortener, err := s.URLDAO.Get(c.Request.Context(), &dao.Shortener{
 		ShortenUrl: shorten_url,
 	})
 
@@ -34,7 +34,7 @@ func (s *Service) GetUrl(c *gin.Context) {
 		log.Fatal(err)
 	}
 
-	c.Redirect(302, url)
+	c.Redirect(302, shortener.Url)
 }
 
 func (s *Service) ShortenUrl(c *gin.Context) {

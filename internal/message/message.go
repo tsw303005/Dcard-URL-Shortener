@@ -1,14 +1,12 @@
 package message
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 )
 
 type ShortenUrlRequest struct {
-	Url       string    `json:"url"`
-	ExpiredAt time.Time `json:"expiredAt"`
+	Url       string `json:"url"`
+	ExpiredAt string `json:"expiredAt"`
 }
 
 type ShortenUrlResponse struct {

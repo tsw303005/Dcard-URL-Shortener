@@ -36,25 +36,26 @@ func (dao *redisShortenerDAO) Shorten(ctx context.Context, req *Shortener) (uuid
 	return dao.baseDAO.Shorten(ctx, req)
 }
 
-func (dao *redisShortenerDAO) Get(ctx context.Context, req *Shortener) (string, error) {
-	var shortener Shortener
+func (dao *redisShortenerDAO) Get(ctx context.Context, req *Shortener) (*Shortener, error) {
+	var shortener = &Shortener{}
 
 	if err := dao.cache.Once(&cache.Item{
-		Key:   req.ShortenUrl,
-		Value: &shortener,
+		Key:   getShortenerUrl(req.ShortenUrl),
+		Value: shortener,
 		TTL:   shortenerDAORedisCacheDuration,
 		Do: func(*cache.Item) (interface{}, error) {
 			return dao.baseDAO.Get(ctx, req)
 		},
 	}); err != nil {
-		return "", err
+		return nil, err
 	}
 
-	now := time.Now()
+	now := time.Now().Unix()
+	expirted_at, _ := time.Parse(time.RFC3339, shortener.ExpiredAt)
 
-	if now.After(shortener.ExpiredAt) {
-		return "", ErrExpiredat
+	if now > expirted_at.Unix() {
+		return nil, ErrExpiredat
 	}
 
-	return shortener.Url, nil
+	return shortener, nil
 }

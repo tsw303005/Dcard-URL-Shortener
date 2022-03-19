@@ -38,18 +38,19 @@ func (dao *pgShortenerDAO) Shorten(ctx context.Context, req *Shortener) (uuid.UU
 	return req.ID, req.ShortenUrl, nil
 }
 
-func (dao *pgShortenerDAO) Get(ctx context.Context, req *Shortener) (string, error) {
-	var shortener Shortener
+func (dao *pgShortenerDAO) Get(ctx context.Context, req *Shortener) (*Shortener, error) {
+	var shortener = &Shortener{}
 
-	if err := dao.client.ModelContext(ctx, &shortener).Column("shorten_url = ?", req.ShortenUrl).Select(); err != nil {
-		return "", ErrShortenURLNotFound
+	if err := dao.client.ModelContext(ctx, shortener).Where("shorten_url = ?", req.ShortenUrl).Select(); err != nil {
+		return nil, err
 	}
 
-	now := time.Now()
+	now := time.Now().Unix()
+	expirted_at, _ := time.Parse(time.RFC3339, shortener.ExpiredAt)
 
-	if now.After(shortener.ExpiredAt) {
-		return "", ErrExpiredat
+	if now > expirted_at.Unix() {
+		return nil, ErrExpiredat
 	}
 
-	return shortener.Url, nil
+	return shortener, nil
 }
