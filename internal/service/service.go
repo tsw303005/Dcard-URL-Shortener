@@ -10,20 +10,20 @@ import (
 )
 
 type Service struct {
-	URLDAO dao.URLDAO
+	URLDAO dao.ShortenerDAO
 }
 
-func NewService(URLDAO dao.URLDAO) *Service {
+func NewService(URLDAO dao.ShortenerDAO) *Service {
 	return &Service{
 		URLDAO: URLDAO,
 	}
 }
 
 func (s *Service) GetUrl(c *gin.Context) {
-	id := c.Query("id")
+	shorten_url := c.Query("shorten_url")
 
-	url, err := s.URLDAO.Get(dao.URL{
-		ID: id,
+	url, err := s.URLDAO.Get(c.Request.Context(), &dao.Shortener{
+		ShortenUrl: shorten_url,
 	})
 
 	if err != nil {
@@ -47,7 +47,7 @@ func (s *Service) ShortenUrl(c *gin.Context) {
 		})
 	}
 
-	url_id, shorten_url, err := s.URLDAO.Shorten(dao.URL{
+	url_id, shorten_url, err := s.URLDAO.Shorten(c.Request.Context(), &dao.Shortener{
 		Url:       req.Url,
 		ExpiredAt: req.ExpiredAt,
 	})

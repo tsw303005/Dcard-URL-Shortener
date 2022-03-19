@@ -2,6 +2,8 @@ package message
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type ShortenUrlRequest struct {
@@ -10,6 +12,6 @@ type ShortenUrlRequest struct {
 }
 
 type ShortenUrlResponse struct {
-	Id         string `json:"id"`
-	ShortenUrl string `json:"shortUrl"`
+	Id         uuid.UUID `json:"id"`
+	ShortenUrl string    `json:"shortUrl"`
 }

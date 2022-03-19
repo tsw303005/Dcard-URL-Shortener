@@ -1,22 +1,27 @@
 package dao
 
 import (
+	"context"
 	"errors"
 	"time"
+
+	"github.com/google/uuid"
 )
 
-type URL struct {
-	ID         string
+type Shortener struct {
+	ID         uuid.UUID
 	Url        string
 	ShortenUrl string
 	ExpiredAt  time.Time
 }
 
-type URLDAO interface {
-	Shorten(req URL) (string, string, error)
-	Get(req URL) (string, error)
+type ShortenerDAO interface {
+	Shorten(ctx context.Context, req *Shortener) (uuid.UUID, string, error)
+	Get(ctx context.Context, req *Shortener) (string, error)
 }
 
 var (
-	ExpiredURLError = errors.New("id has alread expired")
+	ErrExpiredat          = errors.New("id has already expired")
+	ErrShortenURLNotFound = errors.New("shorten url not found")
+	ErrShortenURLFail     = errors.New("fail to shorten url")
 )
