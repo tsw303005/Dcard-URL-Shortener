@@ -20,28 +20,3 @@ type URLDAO interface {
 var (
 	ExpiredURLError = errors.New("id has alread expired")
 )
-
-type Test struct {
-	a int
-}
-
-var _ URLDAO = (*Test)(nil)
-
-func NewTestDAO() *Test {
-	return &Test{
-		a: 10,
-	}
-}
-
-func (t *Test) Shorten(req URL) (string, string, error) {
-	x := "a"
-	y := "b"
-
-	return x, y, nil
-}
-
-func (t *Test) Get(req URL) (string, error) {
-	x := req.ID
-
-	return x, nil
-}

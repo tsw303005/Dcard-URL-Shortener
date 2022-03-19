@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,7 @@ func main() {
 }
 
 func runAPI() {
+	ctx := context.Background()
 
 	testDAO := dao.NewTestDAO()
 	svc := service.NewService(testDAO)
