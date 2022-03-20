@@ -1,18 +1,49 @@
 version: '3.9'
 
 x-common-env: &common-env
-  POSTGRES_URL: postgres://postgres@localhost:5432/postgres?sslmode=disable
-  REDIS_ADDR: localhost:6379
+  POSTGRES_URL: postgres://postgres@postgres:5432/postgres?sslmode=disable
+  REDIS_ADDR: redis:6379
+
+x-common-build: &common-build
+  image: golang:latest
+  working_dir: /src
+  environment:
+    <<: *common-env
+  volumes:
+  - .:/src
+  - ~/go/pkg/mod/cache:/go/pkg/mod/cache
 
 services:
   postgres:
     image: postgres:14-alpine
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
-    ports:
-      - 5432:5432
 
   redis:
     image: redis:6.2-alpine
+
+  build:
+    <<: *common-build
+    command:
+    - make
+    - build
+
+  image:
+    image: dcard-shortener-url:latest
+    build:
+      context: .
+    environment:
+      <<: *common-env
+
+  shortener-api:
+    image: dcard-shortener-url:latest
+    environment:
+      <<: *common-env
+    command:
+    - /cmd
+    depends_on:
+    - postgres
+    - redis
+    restart: on-failure:5
     ports:
-      - 6379:6379
+    - 8080:8080

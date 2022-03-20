@@ -8,9 +8,9 @@ import (
 )
 
 type Redisconfig struct {
-	Addr     string
-	Password string
-	Database int
+	Addr     string `long:"addr" env:"ADDR" description:"the address of Redis" required:"true"`
+	Password string `long:"password" env:"PASSWORD" description:"the password of Redis"`
+	Database int    `long:"database" env:"DATABASE" description:"the database of Redis"`
 }
 
 type RedisClient struct {
