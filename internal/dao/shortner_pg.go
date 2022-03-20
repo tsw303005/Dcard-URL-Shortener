@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -22,11 +21,7 @@ func NewPGShortenerDAO(pgClient *pgkit.PGClient) *pgShortenerDAO {
 }
 
 func (dao *pgShortenerDAO) Shorten(ctx context.Context, req *Shortener) (uuid.UUID, string, error) {
-	id, err := uuid.NewUUID()
-
-	if err != nil {
-		log.Fatal("failed to create uuid", err)
-	}
+	id := uuid.New()
 
 	req.ID = id
 	req.ShortenUrl = "http://localhost/" + id.String()
