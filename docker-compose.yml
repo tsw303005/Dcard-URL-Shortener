@@ -1,7 +1,7 @@
 version: '3.9'
 
 x-common-env: &common-env
-  POSTGRES_URL: postgres://postgres@localhost:5432/postgres?sslmode=disable
+  POSTGRES_URL: postgres://postgres@postgres:5432/postgres?sslmode=disable
   REDIS_ADDR: redis:6379
 
 x-common-build: &common-build

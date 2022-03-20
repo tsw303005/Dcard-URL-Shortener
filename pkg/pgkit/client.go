@@ -9,7 +9,7 @@ import (
 )
 
 type PGConfig struct {
-	URL string `long:"url" env:"url" description:"the URL of PostgresSQL" required:"true"`
+	URL string `long:"url" env:"URL" description:"the URL of PostgresSQL" required:"true"`
 }
 
 type PGClient struct {
