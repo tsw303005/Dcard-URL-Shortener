@@ -10,7 +10,16 @@ import (
 
 type LoggerLevel zapcore.Level
 
-type LoggerConf struct {
+func (l LoggerLevel) MarshalFlag() (string, error) {
+	return zapcore.Level(l).String(), nil
+}
+
+func (l *LoggerLevel) UnmarshalFlag(value string) error {
+	zv := (*zapcore.Level)(l)
+	return zv.UnmarshalText([]byte(value))
+}
+
+type LoggerConfig struct {
 	Level       LoggerLevel `long:"level" description:"set log level" default:"info" env:"LEVEL"`
 	Development bool        `long:"development" description:"enable development mode" env:"DEVELOPMENT"`
 }
@@ -23,7 +32,7 @@ func NewNopLogger() *Logger {
 	return &Logger{Logger: zap.NewNop()}
 }
 
-func NewLogger(conf *LoggerConf) *Logger {
+func NewLogger(conf *LoggerConfig) *Logger {
 	var config zap.Config
 
 	if conf.Development {

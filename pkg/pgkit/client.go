@@ -2,10 +2,11 @@ package pgkit
 
 import (
 	"context"
-	"log"
 	"os"
 
 	"github.com/go-pg/pg/v10"
+	"github.com/tsw303005/Dcard-URL-Shortener/pkg/logkit"
+	"go.uber.org/zap"
 )
 
 type PGConfig struct {
@@ -29,15 +30,19 @@ func NewPGClient(ctx context.Context, conf *PGConfig) *PGClient {
 		conf.URL = url
 	}
 
+	logger := logkit.FromContext(ctx).With(zap.String("url", conf.URL))
+
 	opts, err := pg.ParseURL(conf.URL)
 	if err != nil {
-		log.Fatal("failed to parse PostgresSQL url", err)
+		logger.Fatal("failed to parse PostgresSQL url", zap.Error(err))
 	}
 
 	db := pg.Connect(opts).WithContext(ctx)
 	if err := db.Ping(ctx); err != nil {
-		log.Fatal("failed to ping PostgresSQL", err)
+		logger.Fatal("failed to ping PostgresSQL", zap.Error(err))
 	}
+
+	logger.Info("create PostgresSQL client suceessfully")
 
 	return &PGClient{
 		DB: db,
