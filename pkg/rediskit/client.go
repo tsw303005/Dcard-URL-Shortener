@@ -2,9 +2,10 @@ package rediskit
 
 import (
 	"context"
-	"log"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/tsw303005/Dcard-URL-Shortener/pkg/logkit"
+	"go.uber.org/zap"
 )
 
 type Redisconfig struct {
@@ -27,6 +28,11 @@ func (c *RedisClient) Close() error {
 }
 
 func NewRedisClient(ctx context.Context, conf *Redisconfig) *RedisClient {
+	logger := logkit.FromContext(ctx).With(
+		zap.String("addr", conf.Addr),
+		zap.Int("database", conf.Database),
+	)
+
 	client := redis.NewClient(&redis.Options{
 		Addr:     conf.Addr,
 		Password: conf.Password,
@@ -34,7 +40,7 @@ func NewRedisClient(ctx context.Context, conf *Redisconfig) *RedisClient {
 	})
 
 	if err := client.Ping(ctx).Err(); err != nil {
-		log.Fatal(err)
+		logger.Fatal("failed to ping Redis", zap.Error(err))
 	}
 
 	return &RedisClient{

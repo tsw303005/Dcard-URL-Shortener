@@ -3,6 +3,10 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	flags "github.com/jessevdk/go-flags"
@@ -55,25 +59,44 @@ func runAPI() {
 	shortenerDAO := dao.NewRedisShortenerDAO(redisClient, pgShortenerDAO)
 	svc := service.NewService(shortenerDAO)
 
-	r := gin.Default()
-	r.GET("/", func(c *gin.Context) {
+	router := gin.Default()
+	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status": "ok",
 		})
 	})
 
-	r.GET("/get", func(c *gin.Context) {
+	router.GET("/get", func(c *gin.Context) {
 		svc.GetUrl(c)
 	})
 
-	r.POST("/shorten", func(c *gin.Context) {
+	router.POST("/shorten", func(c *gin.Context) {
 		svc.ShortenUrl(c)
 	})
 
 	logger.Info("listening to port 8080")
-	err := r.Run(":8080")
 
-	if err != nil {
-		log.Fatal(err)
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: router,
 	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			logger.Fatal("failed to serve the request", zap.Error(err))
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	logger.Info("get shutdown signal")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		logger.Fatal("fail to shutdown server", zap.Error(err))
+	}
+	logger.Info("server has already shutdown")
 }
