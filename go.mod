@@ -37,6 +37,8 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20220307211146-efcb8507fb70 // indirect
 	golang.org/x/exp v0.0.0-20220303002715-f922e1b6e9ab // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
@@ -49,4 +51,7 @@ require (
 	mellium.im/sasl v0.2.1 // indirect
 )
 
-require github.com/google/uuid v1.3.0
+require (
+	github.com/google/uuid v1.3.0
+	go.uber.org/zap v1.16.0
+)
