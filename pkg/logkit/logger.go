@@ -10,7 +10,7 @@ import (
 
 type LoggerLevel zapcore.Level
 
-type LoggerConf struct {
+type LoggerConfig struct {
 	Level       LoggerLevel `long:"level" description:"set log level" default:"info" env:"LEVEL"`
 	Development bool        `long:"development" description:"enable development mode" env:"DEVELOPMENT"`
 }
@@ -23,7 +23,7 @@ func NewNopLogger() *Logger {
 	return &Logger{Logger: zap.NewNop()}
 }
 
-func NewLogger(conf *LoggerConf) *Logger {
+func NewLogger(conf *LoggerConfig) *Logger {
 	var config zap.Config
 
 	if conf.Development {

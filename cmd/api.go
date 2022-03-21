@@ -8,13 +8,16 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/dao"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/service"
+	"github.com/tsw303005/Dcard-URL-Shortener/pkg/logkit"
 	"github.com/tsw303005/Dcard-URL-Shortener/pkg/pgkit"
 	"github.com/tsw303005/Dcard-URL-Shortener/pkg/rediskit"
+	"go.uber.org/zap"
 )
 
 type APIArgs struct {
 	rediskit.Redisconfig `group:"redis" namespace:"redis" env-namespace:"REDIS"`
 	pgkit.PGConfig       `group:"postgres" namespace:"postgres" env-namespace:"POSTGRES"`
+	logkit.LoggerConfig  `group:"logger" namespace:"logger" env-namespace:"LOGGER"`
 }
 
 func runAPI() {
@@ -25,17 +28,26 @@ func runAPI() {
 		log.Fatal("failed to parse flag", err.Error())
 	}
 
+	logger := logkit.NewLogger(&args.LoggerConfig)
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			log.Fatal("fail to sync logger", err.Error())
+		}
+	}()
+
+	ctx = logger.WithContext(ctx)
+
 	redisClient := rediskit.NewRedisClient(ctx, &args.Redisconfig)
 	defer func() {
 		if err := redisClient.Close(); err != nil {
-			log.Fatal("failed to close redis client", err)
+			logger.Fatal("failed to close redis client", zap.Error(err))
 		}
 	}()
 
 	pgClient := pgkit.NewPGClient(ctx, &args.PGConfig)
 	defer func() {
 		if err := pgClient.Close(); err != nil {
-			log.Fatal("failed to close postgres client", err)
+			logger.Fatal("failed to close postgres client", zap.Error(err))
 		}
 	}()
 
@@ -58,6 +70,7 @@ func runAPI() {
 		svc.ShortenUrl(c)
 	})
 
+	logger.Info("listening to port 8080")
 	err := r.Run(":8080")
 
 	if err != nil {
