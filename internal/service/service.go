@@ -2,7 +2,6 @@ package service
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/dao"
@@ -10,56 +9,64 @@ import (
 )
 
 type Service struct {
-	URLDAO dao.ShortenerDAO
+	urlDAO dao.ShortenerDAO
 }
 
-func NewService(URLDAO dao.ShortenerDAO) *Service {
+func NewService(urlDAO dao.ShortenerDAO) *Service {
 	return &Service{
-		URLDAO: URLDAO,
+		urlDAO: urlDAO,
 	}
 }
 
-func (s *Service) GetUrl(c *gin.Context) {
-	shorten_url := c.Query("shorten_url")
+func (s *Service) GetURL(c *gin.Context) {
+	ShortenURL := c.Query("shorten_url")
 
-	shortener, err := s.URLDAO.Get(c.Request.Context(), &dao.Shortener{
-		ShortenUrl: shorten_url,
+	shortener, err := s.urlDAO.Get(c.Request.Context(), &dao.Shortener{
+		ShortenURL: ShortenURL,
 	})
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   err,
-			"request": "get url",
+	if err == dao.ErrExpiredat {
+		c.JSON(message.URLExpired, gin.H{
+			"error":   "this shorten url has already expired",
+			"request": "redirct url request",
 		})
 		log.Fatal(err)
-	}
-
-	c.Redirect(302, shortener.Url)
-}
-
-func (s *Service) ShortenUrl(c *gin.Context) {
-	var req message.ShortenUrlRequest
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   err,
-			"request": "shorten url",
+	} else if err != nil {
+		c.JSON(message.ServiceError, gin.H{
+			"error":   "internal server error",
+			"request": "redirct url request",
 		})
 	}
 
-	url_id, shorten_url, err := s.URLDAO.Shorten(c.Request.Context(), &dao.Shortener{
-		Url:       req.Url,
+	c.Redirect(message.URLRedirect, shortener.URL)
+}
+
+func (s *Service) ShortenURL(c *gin.Context) {
+	var req message.ShortenURLRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(message.BadRequest, gin.H{
+			"error":   "argument error",
+			"request": "shorten url request",
+		})
+	}
+
+	urlID, shortenURL, err := s.urlDAO.Shorten(c.Request.Context(), &dao.Shortener{
+		URL:       req.URL,
 		ExpiredAt: req.ExpiredAt,
 	})
 
 	if err != nil {
-		log.Fatal(err)
+		c.JSON(message.ServiceError, gin.H{
+			"error":   "internal server error",
+			"request": "shorten url request",
+		})
 	}
 
-	resp := message.ShortenUrlResponse{
-		Id:         url_id,
-		ShortenUrl: shorten_url,
+	resp := message.ShortenURLResponse{
+		ID:         urlID,
+		ShortenURL: shortenURL,
 	}
 
-	c.JSON(200, resp)
+	c.JSON(message.SuccessRequest, resp)
 }

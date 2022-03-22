@@ -40,7 +40,7 @@ func (dao *redisShortenerDAO) Get(ctx context.Context, req *Shortener) (*Shorten
 	var shortener = &Shortener{}
 
 	if err := dao.cache.Once(&cache.Item{
-		Key:   getShortenerUrl(req.ShortenUrl),
+		Key:   getShortenerURL(req.ShortenURL),
 		Value: shortener,
 		TTL:   shortenerDAORedisCacheDuration,
 		Do: func(*cache.Item) (interface{}, error) {
@@ -51,9 +51,9 @@ func (dao *redisShortenerDAO) Get(ctx context.Context, req *Shortener) (*Shorten
 	}
 
 	now := time.Now().Unix()
-	expirted_at, _ := time.Parse(time.RFC3339, shortener.ExpiredAt)
+	expirtedAt, _ := time.Parse(time.RFC3339, shortener.ExpiredAt)
 
-	if now > expirted_at.Unix() {
+	if now > expirtedAt.Unix() {
 		return nil, ErrExpiredat
 	}
 
