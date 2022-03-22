@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	flags "github.com/jessevdk/go-flags"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/dao"
+	"github.com/tsw303005/Dcard-URL-Shortener/internal/message"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/service"
 	"github.com/tsw303005/Dcard-URL-Shortener/pkg/logkit"
 	"github.com/tsw303005/Dcard-URL-Shortener/pkg/pgkit"
@@ -23,6 +24,8 @@ type APIArgs struct {
 	pgkit.PGConfig       `group:"postgres" namespace:"postgres" env-namespace:"POSTGRES"`
 	logkit.LoggerConfig  `group:"logger" namespace:"logger" env-namespace:"LOGGER"`
 }
+
+const gracefulWaitSecond = 5
 
 func runAPI() {
 	ctx := context.Background()
@@ -61,17 +64,17 @@ func runAPI() {
 
 	router := gin.Default()
 	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+		c.JSON(message.SuccessRequest, gin.H{
 			"status": "ok",
 		})
 	})
 
 	router.GET("/get", func(c *gin.Context) {
-		svc.GetUrl(c)
+		svc.GetURL(c)
 	})
 
 	router.POST("/shorten", func(c *gin.Context) {
-		svc.ShortenUrl(c)
+		svc.ShortenURL(c)
 	})
 
 	logger.Info("listening to port 8080")
@@ -92,7 +95,7 @@ func runAPI() {
 	<-quit
 	logger.Info("get shutdown signal")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), gracefulWaitSecond*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {

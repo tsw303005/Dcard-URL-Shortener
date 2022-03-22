@@ -9,8 +9,8 @@ import (
 
 type Shortener struct {
 	ID         uuid.UUID
-	Url        string
-	ShortenUrl string
+	URL        string
+	ShortenURL string
 	ExpiredAt  string
 }
 
@@ -25,6 +25,6 @@ var (
 	ErrShortenURLFail     = errors.New("fail to shorten url")
 )
 
-func getShortenerUrl(shortenerUrl string) string {
-	return "getUrl:" + shortenerUrl
+func getShortenerURL(shortenerURL string) string {
+	return "getUrl:" + shortenerURL
 }

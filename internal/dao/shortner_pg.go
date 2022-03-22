@@ -24,26 +24,26 @@ func (dao *pgShortenerDAO) Shorten(ctx context.Context, req *Shortener) (uuid.UU
 	id := uuid.New()
 
 	req.ID = id
-	req.ShortenUrl = "http://localhost/" + id.String()
+	req.ShortenURL = "http://localhost/" + id.String()
 
 	if _, err := dao.client.ModelContext(ctx, req).Insert(); err != nil {
 		return uuid.Nil, "", ErrShortenURLFail
 	}
 
-	return req.ID, req.ShortenUrl, nil
+	return req.ID, req.ShortenURL, nil
 }
 
 func (dao *pgShortenerDAO) Get(ctx context.Context, req *Shortener) (*Shortener, error) {
 	var shortener = &Shortener{}
 
-	if err := dao.client.ModelContext(ctx, shortener).Where("shorten_url = ?", req.ShortenUrl).Select(); err != nil {
+	if err := dao.client.ModelContext(ctx, shortener).Where("shorten_url = ?", req.ShortenURL).Select(); err != nil {
 		return nil, err
 	}
 
 	now := time.Now().Unix()
-	expirted_at, _ := time.Parse(time.RFC3339, shortener.ExpiredAt)
+	expirtedAt, _ := time.Parse(time.RFC3339, shortener.ExpiredAt)
 
-	if now > expirted_at.Unix() {
+	if now > expirtedAt.Unix() {
 		return nil, ErrExpiredat
 	}
 
