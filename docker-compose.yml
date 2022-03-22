@@ -28,6 +28,17 @@ services:
     - make
     - build
 
+  lint:
+    image: golangci/golangci-lint:v1.44.0
+    working_dir: /src
+    environment:
+      GOLANGCI_LINT_CACHE: /src/.cache/golangci-lint-cache
+    volumes:
+    - .:/src
+    command:
+    - make
+    - lint
+
   image:
     image: dcard-shortener-url:latest
     build:
