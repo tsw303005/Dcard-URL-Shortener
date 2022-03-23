@@ -86,10 +86,11 @@ func runAPI() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			logger.Fatal("failed to serve the request", zap.Error(err))
+			logger.Fatal("fail to serve the request", zap.Error(err))
 		}
 	}()
 
+	// gracefully shutdown with timeout
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
