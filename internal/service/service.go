@@ -19,10 +19,10 @@ func NewService(urlDAO dao.ShortenerDAO) *Service {
 }
 
 func (s *Service) GetURL(c *gin.Context) {
-	ShortenURL := c.Query("shorten_url")
+	shortenURL := c.Query("shorten_url")
 
 	shortener, err := s.urlDAO.Get(c.Request.Context(), &dao.Shortener{
-		ShortenURL: ShortenURL,
+		ShortenURL: shortenURL,
 	})
 
 	if err == dao.ErrExpiredat {
@@ -30,12 +30,13 @@ func (s *Service) GetURL(c *gin.Context) {
 			"error":   "this shorten url has already expired",
 			"request": "redirct url request",
 		})
-		log.Fatal(err)
+		return
 	} else if err != nil {
 		c.JSON(message.ServiceError, gin.H{
 			"error":   "internal server error",
 			"request": "redirct url request",
 		})
+		log.Fatal("internal service error")
 	}
 
 	c.Redirect(message.URLRedirect, shortener.URL)
@@ -49,6 +50,7 @@ func (s *Service) ShortenURL(c *gin.Context) {
 			"error":   "argument error",
 			"request": "shorten url request",
 		})
+		return
 	}
 
 	urlID, shortenURL, err := s.urlDAO.Shorten(c.Request.Context(), &dao.Shortener{
@@ -61,6 +63,7 @@ func (s *Service) ShortenURL(c *gin.Context) {
 			"error":   "internal server error",
 			"request": "shorten url request",
 		})
+		return
 	}
 
 	resp := message.ShortenURLResponse{
