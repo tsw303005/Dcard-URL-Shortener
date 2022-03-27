@@ -73,7 +73,7 @@ var _ = Describe("Service", func() {
 					URL: "fake_url",
 				}
 
-				req, err = http.NewRequestWithContext(ctx, "GET", "/test_get?shorten_url="+shortenURL, nil)
+				req, err = http.NewRequestWithContext(ctx, "GET", "/test_get?shorten_url="+shortenURL, http.NoBody)
 				Expect(err).NotTo(HaveOccurred())
 
 				shortenerDAO.EXPECT().Get(req.Context(), &dao.Shortener{
@@ -90,7 +90,7 @@ var _ = Describe("Service", func() {
 
 		When("date expired", func() {
 			BeforeEach(func() {
-				req, err = http.NewRequestWithContext(ctx, "GET", "/test_get?shorten_url="+shortenURL, nil)
+				req, err = http.NewRequestWithContext(ctx, "GET", "/test_get?shorten_url="+shortenURL, http.NoBody)
 				Expect(err).NotTo(HaveOccurred())
 
 				shortenerDAO.EXPECT().Get(req.Context(), &dao.Shortener{
