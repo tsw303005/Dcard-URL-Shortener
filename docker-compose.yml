@@ -33,6 +33,12 @@ services:
     command:
     - make
     - generate
+  
+  test:
+    <<: *common-build
+    command:
+    - make
+    - test
 
   lint:
     image: golangci/golangci-lint:v1.44.0

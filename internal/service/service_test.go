@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -22,25 +24,22 @@ var _ = Describe("Service", func() {
 	var (
 		controller   *gomock.Controller
 		shortenerDAO *daomock.MockShortenerDAO
-		ginContext   *gin.Context
+		router       *gin.Engine
+		w            *httptest.ResponseRecorder
 		svc          *Service
+		req          *http.Request
 		shortener    *dao.Shortener
+		ctx          context.Context
 	)
 
 	const shortenURL = "fake shorten url"
 
 	BeforeEach(func() {
 		controller = gomock.NewController(GinkgoT())
+		w = httptest.NewRecorder()
 		svc = NewService(shortenerDAO)
 		shortenerDAO = daomock.NewMockShortenerDAO(controller)
-		ginContext, _ = gin.CreateTestContext(httptest.NewRecorder())
-
-		ginContext.Params = []gin.Param{
-			{
-				Key:   "shorten_url",
-				Value: shortenURL,
-			},
-		}
+		router = gin.Default()
 	})
 
 	AfterEach(func() {
@@ -48,8 +47,12 @@ var _ = Describe("Service", func() {
 	})
 
 	Describe("GetURL", func() {
+		BeforeEach(func() {
+			req, _ := http.NewRequest()
+		})
+
 		JustBeforeEach(func() {
-			svc.GetURL(ginContext)
+			router.ServeHTTP(w, req)
 		})
 
 		When("success", func() {
@@ -58,14 +61,14 @@ var _ = Describe("Service", func() {
 					URL: "fake url",
 				}
 
-				shortenerDAO.EXPECT().Get(ginContext.Request.Context(), &dao.Shortener{
+				shortenerDAO.EXPECT().Get(ctx, &dao.Shortener{
 					ShortenURL: ginContext.Query("shorten_url"),
 				}).Return(shortener, nil)
 			})
 
 			It("redircts with no error", func() {
 				Expect(ginContext.Writer.Status()).To(Equal(message.URLRedirect))
-				Expect(ginContext.Request.Header)
+				Expect(ginContext.FullPath()).To(Equal("fake url"))
 			})
 		})
 

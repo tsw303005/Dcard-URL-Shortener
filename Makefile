@@ -4,7 +4,9 @@ DOCKER_COMPOSE := $(or $(DOCKER_COMPOSE),$(DOCKER_COMPOSE),docker compose)
 
 INTERNAL := internal
 
+####################################################################################################
 # clean
+
 .PHONY: clean
 clean:
 	rm -rf bin/*
@@ -22,7 +24,9 @@ build:
 	mkdir -p ./bin/app
 	go build -o ./bin/app/cmd ./cmd/*.go
 
+####################################################################################################
 # lint
+
 .PHONY: dc.pkg.lint
 dc.pkg.lint:
 	$(DOCKER_COMPOSE) run --rm lint make pkg.lint
@@ -44,7 +48,9 @@ internal.lint:
 lint:
 	golangci-lint run ./...
 
+####################################################################################################
 # generate
+
 define make-dc-generate-rules
 
 .PHONY: dc.$1.generate
@@ -79,3 +85,36 @@ generate: pkg.generate $(addsuffix .generate,$(INTERNAL))
 
 bin/mockgen: go.mod
 	go build -o $@ github.com/golang/mock/mockgen
+
+####################################################################################################
+# test
+
+define make-dc-test-rules
+
+.PHONY: dc.$1.test
+dc.$1.test:
+	$(DOCKER_COMPOSE) run --rm make $1.test
+
+endef
+$(foreach module,$(INTERNAL),$(eval $(call make-dc-test-rules,$(module))))
+
+.PHONY: dc.pkg.test
+dc.pkg.test:
+	$(DOCKER_COMPOSE) run --rm test make pkg.test
+
+.PHONY: dc.test
+dc.test:
+	$(DOCKER_COMPOSE) run --rm test
+
+define make-test-rules
+
+$1.test:
+	go test -v -race ./$1/...
+
+endef
+$(foreach module,$(INTERNAL),$(eval $(call make-test-rules,$(module))))
+
+pkg.test:
+	go test -v -race ./pkg/...
+
+test: pkg.test $(addsuffix .test,$(INTERNAL))
