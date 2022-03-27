@@ -19,10 +19,10 @@ func NewService(urlDAO dao.ShortenerDAO) *Service {
 }
 
 func (s *Service) GetURL(c *gin.Context) {
-	ShortenURL := c.Query("shorten_url")
+	shortenURL := c.Query("shorten_url")
 
 	shortener, err := s.urlDAO.Get(c.Request.Context(), &dao.Shortener{
-		ShortenURL: ShortenURL,
+		ShortenURL: shortenURL,
 	})
 
 	if err == dao.ErrExpiredat {

@@ -28,6 +28,12 @@ services:
     - make
     - build
 
+  generate:
+    <<: *common-build
+    command:
+    - make
+    - generate
+
   lint:
     image: golangci/golangci-lint:v1.44.0
     working_dir: /src
