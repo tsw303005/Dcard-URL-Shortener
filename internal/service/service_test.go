@@ -25,21 +25,26 @@ var _ = Describe("Service", func() {
 		controller   *gomock.Controller
 		shortenerDAO *daomock.MockShortenerDAO
 		router       *gin.Engine
-		w            *httptest.ResponseRecorder
 		svc          *Service
-		req          *http.Request
-		shortener    *dao.Shortener
 		ctx          context.Context
 	)
 
-	const shortenURL = "fake shorten url"
+	const shortenURL = "fake_shorten_url"
 
 	BeforeEach(func() {
+		ctx = context.Background()
 		controller = gomock.NewController(GinkgoT())
-		w = httptest.NewRecorder()
-		svc = NewService(shortenerDAO)
 		shortenerDAO = daomock.NewMockShortenerDAO(controller)
+		svc = NewService(shortenerDAO)
 		router = gin.Default()
+
+		router.GET("/test_get", func(c *gin.Context) {
+			svc.GetURL(c)
+		})
+
+		router.POST("/test_shorten", func(c *gin.Context) {
+			svc.ShortenURL(c)
+		})
 	})
 
 	AfterEach(func() {
@@ -47,30 +52,56 @@ var _ = Describe("Service", func() {
 	})
 
 	Describe("GetURL", func() {
+		var (
+			req       *http.Request
+			resp      *httptest.ResponseRecorder
+			shortener *dao.Shortener
+			err       error
+		)
+
 		BeforeEach(func() {
-			req, _ := http.NewRequest()
+			resp = httptest.NewRecorder()
 		})
 
 		JustBeforeEach(func() {
-			router.ServeHTTP(w, req)
+			router.ServeHTTP(resp, req)
 		})
 
 		When("success", func() {
 			BeforeEach(func() {
 				shortener = &dao.Shortener{
-					URL: "fake url",
+					URL: "fake_url",
 				}
 
-				shortenerDAO.EXPECT().Get(ctx, &dao.Shortener{
-					ShortenURL: ginContext.Query("shorten_url"),
+				req, err = http.NewRequestWithContext(ctx, "GET", "/test_get?shorten_url="+shortenURL, nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				shortenerDAO.EXPECT().Get(req.Context(), &dao.Shortener{
+					ShortenURL: shortenURL,
 				}).Return(shortener, nil)
 			})
 
 			It("redircts with no error", func() {
-				Expect(ginContext.Writer.Status()).To(Equal(message.URLRedirect))
-				Expect(ginContext.FullPath()).To(Equal("fake url"))
+				Expect(resp.Code).To(Equal(message.URLRedirect))
+				Expect(resp.Result().Header.Get("Location")).To(Equal("/fake_url"))
+				Expect(resp.Result().Body.Close()).NotTo(HaveOccurred())
 			})
 		})
 
+		When("date expired", func() {
+			BeforeEach(func() {
+				req, err = http.NewRequestWithContext(ctx, "GET", "/test_get?shorten_url="+shortenURL, nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				shortenerDAO.EXPECT().Get(req.Context(), &dao.Shortener{
+					ShortenURL: shortenURL,
+				}).Return(nil, dao.ErrExpiredat)
+			})
+
+			It("returns the error", func() {
+				Expect(resp.Code).To((Equal(message.URLExpired)))
+				Expect(resp.Result().Body.Close()).NotTo(HaveOccurred())
+			})
+		})
 	})
 })
