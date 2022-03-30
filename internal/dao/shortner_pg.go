@@ -2,8 +2,10 @@ package dao
 
 import (
 	"context"
+	"errors"
 	"time"
 
+	"github.com/go-pg/pg/v10"
 	"github.com/google/uuid"
 	"github.com/tsw303005/Dcard-URL-Shortener/pkg/pgkit"
 )
@@ -37,6 +39,9 @@ func (dao *pgShortenerDAO) Get(ctx context.Context, req *Shortener) (*Shortener,
 	var shortener = &Shortener{}
 
 	if err := dao.client.ModelContext(ctx, shortener).Where("shorten_url = ?", req.ShortenURL).Select(); err != nil {
+		if errors.Is(err, pg.ErrNoRows) {
+			return nil, ErrShortenURLNotFound
+		}
 		return nil, err
 	}
 
