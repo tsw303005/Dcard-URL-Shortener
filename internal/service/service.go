@@ -31,6 +31,12 @@ func (s *Service) GetURL(c *gin.Context) {
 			"request": "redirct url request",
 		})
 		return
+	} else if err == dao.ErrShortenURLNotFound {
+		c.JSON(message.BadRequest, gin.H{
+			"error":   "this shorten url not found",
+			"request": "redirct url request",
+		})
+		return
 	} else if err != nil {
 		c.JSON(message.ServiceError, gin.H{
 			"error":   "internal server error",
