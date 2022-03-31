@@ -98,8 +98,24 @@ var _ = Describe("Service", func() {
 				}).Return(nil, dao.ErrExpiredat)
 			})
 
-			It("returns the error", func() {
+			It("returns the url expired error", func() {
 				Expect(resp.Code).To((Equal(message.URLExpired)))
+				Expect(resp.Result().Body.Close()).NotTo(HaveOccurred())
+			})
+		})
+
+		When("shorten url not found", func() {
+			BeforeEach(func() {
+				req, err = http.NewRequestWithContext(ctx, "GET", "/test_get?shorten_url="+shortenURL, http.NoBody)
+				Expect(err).NotTo(HaveOccurred())
+
+				shortenerDAO.EXPECT().Get(req.Context(), &dao.Shortener{
+					ShortenURL: shortenURL,
+				}).Return(nil, dao.ErrShortenURLNotFound)
+			})
+
+			It("returns the url not found error", func() {
+				Expect(resp.Code).To(Equal(message.BadRequest))
 				Expect(resp.Result().Body.Close()).NotTo(HaveOccurred())
 			})
 		})
