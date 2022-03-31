@@ -11,5 +11,5 @@ type ShortenURLRequest struct {
 
 type ShortenURLResponse struct {
 	ID         uuid.UUID `json:"id"`
-	ShortenURL string    `json:"shortUrl"`
+	ShortenURL string    `json:"shortenURL"`
 }
