@@ -23,13 +23,20 @@ func NewPGShortenerDAO(pgClient *pgkit.PGClient) *pgShortenerDAO {
 }
 
 func (dao *pgShortenerDAO) Shorten(ctx context.Context, req *Shortener) (uuid.UUID, string, error) {
-	id := uuid.New()
+	// check time if it has alread expired
+	now := time.Now().Unix()
+	expiredAt, _ := time.Parse(time.RFC3339, req.ExpiredAt)
 
+	if now >= expiredAt.Unix() {
+		return uuid.Nil, "", ErrShortenURLFail
+	}
+
+	id := uuid.New()
 	req.ID = id
 	req.ShortenURL = "http://localhost/" + id.String()
 
 	if _, err := dao.client.ModelContext(ctx, req).Insert(); err != nil {
-		return uuid.Nil, "", ErrShortenURLFail
+		return uuid.Nil, "", err
 	}
 
 	return req.ID, req.ShortenURL, nil

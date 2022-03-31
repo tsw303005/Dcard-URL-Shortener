@@ -1,8 +1,6 @@
 package service
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/dao"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/message"
@@ -28,21 +26,21 @@ func (s *Service) GetURL(c *gin.Context) {
 	if err == dao.ErrExpiredat {
 		c.JSON(message.URLExpired, gin.H{
 			"error":   "this shorten url has already expired",
-			"request": "redirct url request",
+			"request": "redirect url request",
 		})
 		return
 	} else if err == dao.ErrShortenURLNotFound {
 		c.JSON(message.BadRequest, gin.H{
 			"error":   "this shorten url not found",
-			"request": "redirct url request",
+			"request": "redirect url request",
 		})
 		return
 	} else if err != nil {
 		c.JSON(message.ServiceError, gin.H{
 			"error":   "internal server error",
-			"request": "redirct url request",
+			"request": "redirect url request",
 		})
-		log.Fatal("internal service error")
+		return
 	}
 
 	c.Redirect(message.URLRedirect, shortener.URL)
@@ -64,7 +62,13 @@ func (s *Service) ShortenURL(c *gin.Context) {
 		ExpiredAt: req.ExpiredAt,
 	})
 
-	if err != nil {
+	if err == dao.ErrShortenURLFail {
+		c.JSON(message.BadRequest, gin.H{
+			"error":   "expiredAt has already expired",
+			"request": "shorten url request",
+		})
+		return
+	} else if err != nil {
 		c.JSON(message.ServiceError, gin.H{
 			"error":   "internal server error",
 			"request": "shorten url request",
