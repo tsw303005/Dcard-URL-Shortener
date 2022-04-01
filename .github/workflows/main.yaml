@@ -17,19 +17,10 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    container: golang:1.17
     steps:
     - name: checkout
       uses: actions/checkout@v2
-
-    - name: cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/go/pkg/mod
-          ~/.cache/go-build
-        key: ${{ runner.os }}-gocache-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-gocache-
     
     - name: test
       run: go test -v -race ./...
