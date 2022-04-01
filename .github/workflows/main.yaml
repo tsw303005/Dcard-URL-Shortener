@@ -15,3 +15,13 @@ jobs:
       with:
         version: v1.44.0
 
+  test:
+    runs-on: ubuntu-latest
+    container: golang:1.17
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    
+    - name: test
+      run: go test -v -race ./...
+  
