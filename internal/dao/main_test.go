@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/tsw303005/Dcard-URL-Shortener/pkg/logkit"
+	"github.com/tsw303005/Dcard-URL-Shortener/pkg/migrationkit"
 	"github.com/tsw303005/Dcard-URL-Shortener/pkg/pgkit"
 	"github.com/tsw303005/Dcard-URL-Shortener/pkg/rediskit"
 )
@@ -30,6 +31,11 @@ var _ = BeforeSuite(func() {
 		pgConf.URL = url
 	}
 
+	migrationConf := &migrationkit.MigrationConfig{
+		Source: "file://../../migrations",
+		URL:    pgConf.URL,
+	}
+
 	redisConf := &rediskit.Redisconfig{
 		Addr: "redis:6379",
 	}
@@ -37,6 +43,13 @@ var _ = BeforeSuite(func() {
 	ctx := logkit.NewLogger(&logkit.LoggerConfig{
 		Development: true,
 	}).WithContext(context.Background())
+
+	migration := migrationkit.NewMigration(ctx, migrationConf)
+	defer func() {
+		Expect(migration.Close()).NotTo(HaveOccurred())
+	}()
+
+	Expect(migration.Up()).NotTo(HaveOccurred())
 
 	pgClient = pgkit.NewPGClient(ctx, pgConf)
 	redisClient = rediskit.NewRedisClient(ctx, redisConf)
@@ -46,3 +59,8 @@ var _ = AfterSuite(func() {
 	Expect(pgClient.Close()).ToNot(HaveOccurred())
 	Expect(redisClient.Close()).ToNot(HaveOccurred())
 })
+
+var pgExec = func(query string, params ...interface{}) {
+	_, err := pgClient.Exec(query, params...)
+	Expect(err).NotTo(HaveOccurred())
+}

@@ -41,6 +41,7 @@ services:
     - test
     depends_on:
     - postgres
+    - redis
 
   lint:
     image: golangci/golangci-lint:v1.44.0

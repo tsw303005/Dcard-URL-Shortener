@@ -28,3 +28,12 @@ var (
 func getShortenerURL(shortenerURL string) string {
 	return "getUrl:" + shortenerURL
 }
+
+func NewFakeShortener(url string) *Shortener {
+	return &Shortener{
+		ID:         uuid.New(),
+		URL:        url,
+		ShortenURL: "fake_shorten_url",
+		ExpiredAt:  "2037-04-08T09:20:41Z",
+	}
+}
