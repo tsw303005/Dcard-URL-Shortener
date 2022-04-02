@@ -39,6 +39,8 @@ services:
     command:
     - make
     - test
+    depends_on:
+    - postgres
 
   lint:
     image: golangci/golangci-lint:v1.44.0
