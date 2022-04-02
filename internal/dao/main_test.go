@@ -12,7 +12,7 @@ import (
 	"github.com/tsw303005/Dcard-URL-Shortener/pkg/rediskit"
 )
 
-func TestService(t *testing.T) {
+func TestDAO(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Test DAO")
 }
