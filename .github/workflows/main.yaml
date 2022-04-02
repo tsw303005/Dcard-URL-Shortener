@@ -27,6 +27,7 @@ jobs:
         image: redis:6.2-alpine
     env:
       POSTGRES_URL: postgres://postgres@postgres:5432/postgres?sslmode=disable
+      REDIS_ADDR: redis:6379
     steps:
     - name: checkout
       uses: actions/checkout@v2
