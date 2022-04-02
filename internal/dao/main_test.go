@@ -23,6 +23,8 @@ var (
 	redisClient *rediskit.RedisClient
 )
 
+const expiredAt string = "2020-04-08T09:20:41Z"
+
 var _ = BeforeSuite(func() {
 	pgConf := &pgkit.PGConfig{
 		URL: "postgres://postgres@postgres:5432/postgres?sslmode=disable",

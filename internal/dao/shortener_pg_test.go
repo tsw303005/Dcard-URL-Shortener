@@ -50,7 +50,7 @@ var _ = Describe("PGShortenerDAO", func() {
 		})
 
 		When("fail", func() {
-			BeforeEach(func() { req.ExpiredAt = "2020-04-08T09:20:41Z" })
+			BeforeEach(func() { req.ExpiredAt = expiredAt })
 
 			It("returns the shorten url fail", func() {
 				Expect(err).To(MatchError(ErrShortenURLFail))
@@ -71,10 +71,6 @@ var _ = Describe("PGShortenerDAO", func() {
 			req = NewFakeShortener("fake_url")
 		})
 
-		AfterEach(func() {
-			deleteShortener(req.ID)
-		})
-
 		JustBeforeEach(func() {
 			shortener, err = shortenerDAO.Get(ctx, req)
 		})
@@ -84,20 +80,35 @@ var _ = Describe("PGShortenerDAO", func() {
 				insertShortener(req)
 			})
 
+			AfterEach(func() {
+				deleteShortener(req.ID)
+			})
+
 			It("returns shortener successfully", func() {
 				Expect(err).NotTo(HaveOccurred())
 				matchShortener(shortener)
 			})
 		})
 
-		When("fail", func() {
+		When("expiredAt expires", func() {
 			BeforeEach(func() {
-				req.ExpiredAt = "2020-04-08T09:20:41Z"
+				req.ExpiredAt = expiredAt
 				insertShortener(req)
+			})
+
+			AfterEach(func() {
+				deleteShortener(req.ID)
 			})
 
 			It("returns expiredAt error", func() {
 				Expect(err).To(MatchError(ErrExpiredat))
+				Expect(shortener).To(BeNil())
+			})
+		})
+
+		When("shorten url not found", func() {
+			It("returns ErrShortenURLNotFound error", func() {
+				Expect(err).To(MatchError(ErrShortenURLNotFound))
 				Expect(shortener).To(BeNil())
 			})
 		})
