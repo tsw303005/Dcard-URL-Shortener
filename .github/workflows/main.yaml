@@ -18,6 +18,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container: golang:1.17
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+    env:
+      POSTGRES_URL: postgres://postgres@postgres:5432/postgres?sslmode=disable
     steps:
     - name: checkout
       uses: actions/checkout@v2
