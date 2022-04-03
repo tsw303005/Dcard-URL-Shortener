@@ -62,7 +62,7 @@ services:
       <<: *common-env
 
   shortener-api:
-    image: tsw303005/dcard-shortener-api:latest
+    image: dcard-shortener-api:latest
     environment:
       <<: *common-env
     command:
