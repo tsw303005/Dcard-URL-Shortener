@@ -55,14 +55,14 @@ services:
     - lint
 
   image:
-    image: dcard-shortener-url:latest
+    image: dcard-shortener-api:latest
     build:
       context: .
     environment:
       <<: *common-env
 
   shortener-api:
-    image: dcard-shortener-url:latest
+    image: tsw303005/dcard-shortener-api:latest
     environment:
       <<: *common-env
     command:
