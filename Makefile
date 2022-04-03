@@ -1,6 +1,6 @@
 PATH := $(CURDIR)/bin:$(PATH)
 
-DOCKER_COMPOSE := $(or $(DOCKER_COMPOSE),$(DOCKER_COMPOSE),docker compose)
+DOCKER_COMPOSE := $(or $(DOCKER_COMPOSE),$(DOCKER_COMPOSE),docker-compose)
 
 INTERNAL := internal
 
