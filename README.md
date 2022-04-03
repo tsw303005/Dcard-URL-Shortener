@@ -56,3 +56,7 @@ This project uses [golangci](https://github.com/golangci/golangci-lint) to check
     ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
+
+## Future Work
+1. This time, I only use [google-uuid](https://pkg.go.dev/github.com/google/uuid) to simply generate shorten url. The next goal is to adopt a suitable shorten url algorithm.
+2. This implementation is kind of like image-to-url converter. So I want to extend this project to contain image-to-url converter in the future.
