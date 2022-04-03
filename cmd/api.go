@@ -72,7 +72,7 @@ func runAPI() {
 	}()
 
 	if err := migration.Up(); err != nil {
-		log.Fatal("failed to call migration up", zap.Error(err))
+		logger.Fatal("failed to call migration up", zap.Error(err))
 	}
 
 	pgShortenerDAO := dao.NewPGShortenerDAO(pgClient)
