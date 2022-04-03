@@ -14,6 +14,7 @@ import (
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/message"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/service"
 	"github.com/tsw303005/Dcard-URL-Shortener/pkg/logkit"
+	"github.com/tsw303005/Dcard-URL-Shortener/pkg/migrationkit"
 	"github.com/tsw303005/Dcard-URL-Shortener/pkg/pgkit"
 	"github.com/tsw303005/Dcard-URL-Shortener/pkg/rediskit"
 	"go.uber.org/zap"
@@ -57,6 +58,22 @@ func runAPI() {
 			logger.Fatal("failed to close postgres client", zap.Error(err))
 		}
 	}()
+
+	migrationConf := &migrationkit.MigrationConfig{
+		Source: "file://migrations",
+		URL:    args.PGConfig.URL,
+	}
+
+	migration := migrationkit.NewMigration(ctx, migrationConf)
+	defer func() {
+		if err := migration.Close(); err != nil {
+			logger.Fatal("failed to close migration", zap.Error(err))
+		}
+	}()
+
+	if err := migration.Up(); err != nil {
+		log.Fatal("failed to call migration up", zap.Error(err))
+	}
 
 	pgShortenerDAO := dao.NewPGShortenerDAO(pgClient)
 	shortenerDAO := dao.NewRedisShortenerDAO(redisClient, pgShortenerDAO)
