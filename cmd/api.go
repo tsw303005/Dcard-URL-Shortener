@@ -94,7 +94,7 @@ func runAPI() {
 		svc.ShortenURL(c)
 	})
 
-	logger.Info("listening to port 8080")
+	logger.Info("listening to port 8008")
 
 	srv := &http.Server{
 		Addr:    ":8008",
