@@ -6,6 +6,15 @@ This is Dcard's homework about implementing url shortener. This repository inclu
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+## Demo
+The following shortened-urls are the examples redirecting to the original websites. You can click these links to see them.
+
+- http://114.32.231.105:1586/get/34ccd248-f9d8-430d-8a95-551219fabab9
+- http://114.32.231.105:1586/get/a428a769-d0b6-4e09-b36b-6075eb0f1ce2
+- http://114.32.231.105:1586/get/ba57eec6-939c-45ca-8ea4-35b36c2ca2dc
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 ## Built With
 The following are the packages used in this Golang project.
 
