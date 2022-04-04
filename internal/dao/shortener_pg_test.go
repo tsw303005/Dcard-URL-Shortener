@@ -30,6 +30,7 @@ var _ = Describe("PGShortenerDAO", func() {
 		BeforeEach(func() {
 			req = &Shortener{}
 			req.ExpiredAt = "2037-04-08T09:20:41Z"
+			req.ShortenURL = "fake_shorten_url"
 			req.URL = "fake_url"
 		})
 
@@ -45,7 +46,7 @@ var _ = Describe("PGShortenerDAO", func() {
 			It("returns id and shorten url with no error", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(id).NotTo(Equal(uuid.Nil))
-				Expect(shortenURL).To(Equal("http://localhost/" + id.String()))
+				Expect(shortenURL).To(Equal("http://fake_shorten_url/get/" + id.String()))
 			})
 		})
 

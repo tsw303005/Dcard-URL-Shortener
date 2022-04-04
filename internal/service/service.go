@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/dao"
 	"github.com/tsw303005/Dcard-URL-Shortener/internal/message"
 )
@@ -17,10 +18,18 @@ func NewService(urlDAO dao.ShortenerDAO) *Service {
 }
 
 func (s *Service) GetURL(c *gin.Context) {
-	shortenURL := c.Query("shorten_url")
+	urlID, err := uuid.Parse(c.Param("url_id"))
+
+	if err != nil || urlID == uuid.Nil {
+		c.JSON(message.BadRequest, gin.H{
+			"error":   "this url id has a wrong format",
+			"request": "redirect url request",
+		})
+		return
+	}
 
 	shortener, err := s.urlDAO.Get(c.Request.Context(), &dao.Shortener{
-		ShortenURL: shortenURL,
+		ID: urlID,
 	})
 
 	if err == dao.ErrExpiredat {
@@ -58,8 +67,9 @@ func (s *Service) ShortenURL(c *gin.Context) {
 	}
 
 	urlID, shortenURL, err := s.urlDAO.Shorten(c.Request.Context(), &dao.Shortener{
-		URL:       req.URL,
-		ExpiredAt: req.ExpiredAt,
+		ShortenURL: c.Request.Host,
+		URL:        req.URL,
+		ExpiredAt:  req.ExpiredAt,
 	})
 
 	if err == dao.ErrShortenURLFail {

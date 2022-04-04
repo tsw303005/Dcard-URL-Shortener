@@ -33,9 +33,9 @@ var _ = Describe("Service", func() {
 		ctx          context.Context
 	)
 
-	const shortenURL = "fake_shorten_url"
 	const url = "fake_url"
 	const expiredAt = "fake_expired_date"
+	const shortenURL = "fake_shorten_url"
 
 	BeforeEach(func() {
 		ctx = context.Background()
@@ -44,7 +44,7 @@ var _ = Describe("Service", func() {
 		svc = NewService(shortenerDAO)
 		router = gin.Default()
 
-		router.GET("/test_get", func(c *gin.Context) {
+		router.GET("/test_get/:url_id", func(c *gin.Context) {
 			svc.GetURL(c)
 		})
 
@@ -62,6 +62,8 @@ var _ = Describe("Service", func() {
 			req       *http.Request
 			resp      *httptest.ResponseRecorder
 			shortener *dao.Shortener
+			urlID     uuid.UUID
+
 			respValue map[string]string
 			err       error
 		)
@@ -80,29 +82,33 @@ var _ = Describe("Service", func() {
 
 		Context("success", func() {
 			BeforeEach(func() {
+				urlID = uuid.New()
+
 				shortener = &dao.Shortener{
 					URL: "fake_url",
 				}
 
-				req, err = http.NewRequestWithContext(ctx, "GET", "/test_get?shorten_url="+shortenURL, http.NoBody)
+				req, err = http.NewRequestWithContext(ctx, "GET", "/test_get/"+urlID.String(), http.NoBody)
 				Expect(err).NotTo(HaveOccurred())
 
 				shortenerDAO.EXPECT().Get(req.Context(), &dao.Shortener{
-					ShortenURL: shortenURL,
+					ID: urlID,
 				}).Return(shortener, nil)
 			})
 
 			When("shorten url found with no error", func() {
 				It("redirects url successfully", func() {
 					Expect(resp.Code).To(Equal(message.URLRedirect))
-					Expect(resp.Result().Header.Get("Location")).To(Equal("/fake_url"))
+					Expect(resp.Result().Header.Get("Location")).To(Equal("/test_get/fake_url"))
 				})
 			})
 		})
 
 		Context("fail", func() {
 			BeforeEach(func() {
-				req, err = http.NewRequestWithContext(ctx, "GET", "/test_get?shorten_url="+shortenURL, http.NoBody)
+				urlID = uuid.New()
+
+				req, err = http.NewRequestWithContext(ctx, "GET", "/test_get/"+urlID.String(), http.NoBody)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
@@ -112,10 +118,22 @@ var _ = Describe("Service", func() {
 				Expect(respValue["request"]).To(Equal("redirect url request"))
 			})
 
+			When("url has a wrong format", func() {
+				BeforeEach(func() {
+					req, err = http.NewRequestWithContext(ctx, "GET", "/test_get/"+"wrong_format", http.NoBody)
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("returns the url format wrong", func() {
+					Expect(respValue["error"]).To(Equal("this url id has a wrong format"))
+					Expect(resp.Code).To(Equal(message.BadRequest))
+				})
+			})
+
 			When("date expired", func() {
 				BeforeEach(func() {
 					shortenerDAO.EXPECT().Get(req.Context(), &dao.Shortener{
-						ShortenURL: shortenURL,
+						ID: urlID,
 					}).Return(nil, dao.ErrExpiredat)
 				})
 
@@ -128,7 +146,7 @@ var _ = Describe("Service", func() {
 			When("shorten url not found", func() {
 				BeforeEach(func() {
 					shortenerDAO.EXPECT().Get(req.Context(), &dao.Shortener{
-						ShortenURL: shortenURL,
+						ID: urlID,
 					}).Return(nil, dao.ErrShortenURLNotFound)
 				})
 
@@ -141,7 +159,7 @@ var _ = Describe("Service", func() {
 			When("internal server error", func() {
 				BeforeEach(func() {
 					shortenerDAO.EXPECT().Get(req.Context(), &dao.Shortener{
-						ShortenURL: shortenURL,
+						ID: urlID,
 					}).Return(nil, errors.New("internal server error"))
 				})
 
