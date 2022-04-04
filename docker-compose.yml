@@ -72,7 +72,7 @@ services:
     - redis
     restart: on-failure:5
     ports:
-    - 8080:8080
+    - 8008:8008
     volumes:
     - .:/src
     working_dir: /src
