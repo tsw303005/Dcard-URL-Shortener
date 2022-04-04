@@ -25,10 +25,6 @@ var (
 	ErrShortenURLFail     = errors.New("fail to shorten url")
 )
 
-func getShortenerURL(shortenerURL string) string {
-	return "getUrl:" + shortenerURL
-}
-
 func NewFakeShortener(url string) *Shortener {
 	return &Shortener{
 		ID:         uuid.New(),

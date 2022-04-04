@@ -110,12 +110,12 @@ var _ = Describe("RedisShortenDAO", func() {
 func insertShortenerInRedis(ctx context.Context, shortenerDAO *redisShortenerDAO, shortener *Shortener) {
 	Expect(shortenerDAO.cache.Set(&cache.Item{
 		Ctx:   ctx,
-		Key:   getShortenerURL(shortener.ShortenURL),
+		Key:   shortener.ID.String(),
 		Value: shortener,
 		TTL:   shortenerDAORedisCacheDuration,
 	})).NotTo(HaveOccurred())
 }
 
 func deleteShortenerInRedis(ctx context.Context, shortenerDAO *redisShortenerDAO, shortener *Shortener) {
-	Expect(shortenerDAO.cache.Delete(ctx, getShortenerURL(shortener.ShortenURL))).NotTo(HaveOccurred())
+	Expect(shortenerDAO.cache.Delete(ctx, shortener.ID.String())).NotTo(HaveOccurred())
 }

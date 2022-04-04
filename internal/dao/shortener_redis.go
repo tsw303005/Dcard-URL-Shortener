@@ -40,7 +40,7 @@ func (dao *redisShortenerDAO) Get(ctx context.Context, req *Shortener) (*Shorten
 	var shortener = &Shortener{}
 
 	if err := dao.cache.Once(&cache.Item{
-		Key:   getShortenerURL(req.ShortenURL),
+		Key:   req.ID.String(),
 		Value: shortener,
 		TTL:   shortenerDAORedisCacheDuration,
 		Do: func(*cache.Item) (interface{}, error) {

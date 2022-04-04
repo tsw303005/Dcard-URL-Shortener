@@ -33,7 +33,7 @@ func (dao *pgShortenerDAO) Shorten(ctx context.Context, req *Shortener) (uuid.UU
 
 	id := uuid.New()
 	req.ID = id
-	req.ShortenURL = "http://localhost/" + id.String()
+	req.ShortenURL = "http://" + req.ShortenURL + "/get/" + id.String()
 
 	if _, err := dao.client.ModelContext(ctx, req).Insert(); err != nil {
 		return uuid.Nil, "", err
@@ -45,7 +45,7 @@ func (dao *pgShortenerDAO) Shorten(ctx context.Context, req *Shortener) (uuid.UU
 func (dao *pgShortenerDAO) Get(ctx context.Context, req *Shortener) (*Shortener, error) {
 	var shortener = &Shortener{}
 
-	if err := dao.client.ModelContext(ctx, shortener).Where("shorten_url = ?", req.ShortenURL).Select(); err != nil {
+	if err := dao.client.ModelContext(ctx, shortener).Where("id = ?", req.ID).Select(); err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
 			return nil, ErrShortenURLNotFound
 		}

@@ -86,7 +86,7 @@ func runAPI() {
 		})
 	})
 
-	router.GET("/get", func(c *gin.Context) {
+	router.GET("/get/:url_id", func(c *gin.Context) {
 		svc.GetURL(c)
 	})
 
