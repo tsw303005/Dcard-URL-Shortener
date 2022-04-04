@@ -97,7 +97,7 @@ func runAPI() {
 	logger.Info("listening to port 8080")
 
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":8008",
 		Handler: router,
 	}
 
